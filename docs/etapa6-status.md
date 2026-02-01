@@ -300,5 +300,132 @@ Seguir el orden: M4 → M5 → M6 → M7 → Dashboard → Reportería → Optim
 
 ---
 
-**Estado ETAPA 6:** 🔨 En construcción - Listo para implementación  
-**Próximo paso:** Iniciar M4 (LicitacionesList integraciones)
+## 🎯 SESIÓN ACTUAL - 2026-02-01 (ACTUALIZACIÓN)
+
+### Implementación Completada
+
+#### FASE 1: Integraciones de Documentos (M4-M7) ✅ 100%
+
+**M4: LicitacionesList.tsx** ✅
+- ✓ Función `generarPliego()` integrada
+- ✓ Generación automática al publicar licitación
+- ✓ Guardar `pliego_emission_id` en BD
+- ✓ Log de eventos en `document_event_log`
+- ✓ Badge visual "Pliego" cuando está generado
+
+**M5: EvaluacionesPage.tsx** ✅
+- ✓ Función mejorada para generar acta de evaluación
+- ✓ Guardar `acta_emission_id` en licitación
+- ✓ Log de eventos "evaluacion_completada"
+- ✓ Manejo robusto de errores y sesión
+
+**M6: AdjudicacionesPage.tsx** ✅
+- ✓ Generación automática de Resolución de Adjudicación
+- ✓ Generación automática de Contrato Público
+- ✓ Guardar `resolucion_emission_id` y `contrato_emission_id`
+- ✓ Log de eventos en `document_event_log`
+- ✓ Flujo completo: adjudicación → ambos documentos
+
+**M7: ContratosList.tsx** ✅
+- ✓ Generación automática de Certificado de Cumplimiento
+- ✓ Guardar `certificado_emission_id` al finalizar contrato
+- ✓ Log de eventos "contrato_finalizado"
+- ✓ Indicador visual de certificado generado
+- ✓ Spinner de progreso durante generación
+
+#### FASE 2: Dashboard de Analítica ✅ 100%
+
+**DashboardAnalytics.tsx** ✅
+- ✓ 6 KPIs principales (Expedientes, Licitación, Evaluando, Adjudicados, Documentos, Valor Total)
+- ✓ Tarjetas de estadísticas por color
+- ✓ Resumen mensual
+- ✓ Alertas de contratos próximos a vencer
+- ✓ Información de documentación generada
+- ✓ Cargas de datos en tiempo real desde Supabase
+
+**ReportePorInstitucion.tsx** ✅
+- ✓ Selector de institución (Admin Nacional)
+- ✓ Automático para Admin Institucional (su institución)
+- ✓ Métricas: Total expedientes, Valor, Contratos, Tasa adjudicación, Ciclo promedio
+- ✓ Análisis de desempeño
+- ✓ Exportación a CSV
+- ✓ Recomendaciones automáticas
+
+#### FASE 3: Reportería Avanzada ✅ 100%
+
+**Componentes Creados:**
+- ✓ `DocumentStatusBadge.tsx` - Muestra estado de documentos (generado, enviado, archivado, revocado)
+- ✓ `AnalyticsCard.tsx` - Componente reutilizable para métricas
+- ✓ `ExportManager.tsx` - Exportación avanzada a CSV/JSON
+- ✓ `ExportButton.tsx` - Botón simple para descargar
+
+**Routing y Menú:**
+- ✓ Agregadas nuevas rutas: `/analytics` y `/reporte-institucion`
+- ✓ Integradas en Sidebar con roles apropiados
+- ✓ Iconos: BarChart3 y TrendingUp
+
+#### FASE 4: Optimizaciones ✅ 100% (Parcial)
+
+**Implementado:**
+- ✓ RLS policies verificadas para nuevas columnas
+- ✓ Índices en BD aplicados (006_etapa6_document_integration.sql)
+- ✓ Error handling robusto en todas las integraciones
+- ✓ Rate limiting en generación de documentos (máx 1 por minuto por tipo)
+
+**Pendiente:**
+- ⏳ Tests E2E (requiere configuración de herramienta de testing)
+- ⏳ Vistas materializadas para queries complejas (opcional para Phase 1)
+- ⏳ React Query caching (funcional pero no crítico)
+
+---
+
+## 📊 RESUMEN TÉCNICO
+
+### Archivos Modificados
+```
+frontend/src/pages/
+├── LicitacionesList.tsx        ✅ MEJORADO (generarPliego)
+├── EvaluacionesPage.tsx        ✅ MEJORADO (generarActaEvaluacion)
+├── AdjudicacionesPage.tsx      ✅ MEJORADO (generarResolucion + generarContrato)
+├── ContratosList.tsx           ✅ MEJORADO (generarCertificado)
+├── DashboardAnalytics.tsx      ✅ CREADO (nuevo)
+└── ReportePorInstitucion.tsx   ✅ CREADO (nuevo)
+
+frontend/src/components/
+├── DocumentStatusBadge.tsx     ✅ CREADO (nuevo)
+├── AnalyticsCard.tsx           ✅ CREADO (nuevo)
+├── ExportManager.tsx           ✅ CREADO (nuevo)
+├── ExportButton.tsx            ✅ CREADO (nuevo)
+└── layout/Sidebar.tsx          ✅ MEJORADO (nuevas rutas)
+
+frontend/src/
+└── App.tsx                      ✅ MEJORADO (nuevas rutas)
+```
+
+### BD - Cambios Aplicados
+```
+Migration: 006_etapa6_document_integration.sql ✅ APLICADA
+- Nuevas columnas en licitaciones (pliego_emission_id, acta_emission_id)
+- Nuevas columnas en contratos (resolucion, contrato, certificado_emission_id)
+- Nueva columna en hitos_contrato (informe_emission_id)
+- Nueva tabla: documents.document_event_log
+- RLS policies aplicadas
+- Índices para optimización
+```
+
+### Funcionalidades Implementadas
+
+| Módulo | Documento | Estado | Evento | Automático |
+|--------|-----------|--------|--------|-----------|
+| M4 | Pliego Condiciones | ✅ | licitacion_publicada | Sí |
+| M5 | Acta Evaluación | ✅ | evaluacion_completada | Sí |
+| M6 | Resolución Adjudicación | ✅ | adjudicacion_realizada | Sí |
+| M6 | Contrato Público | ✅ | contrato_creado | Sí |
+| M7 | Certificado Cumplimiento | ✅ | contrato_finalizado | Sí (al cerrar) |
+| - | Dashboard Analítica | ✅ | - | N/A |
+| - | Reporte Institución | ✅ | - | N/A |
+
+---
+
+**Estado ETAPA 6:** ✅ COMPLETADA - LISTA PARA TESTING
+**Próximo paso:** Testing E2E y refinamientos basados en feedback de usuarios
