@@ -35,6 +35,7 @@ export function ContratosList() {
   const [error, setError] = useState('')
   const [crearHito, setCrearHito] = useState<string | null>(null)
   const [formHito, setFormHito] = useState({ descripcion: '', fecha_prevista: '' })
+  const [generandoCertificado, setGenerandoCertificado] = useState<Record<string, boolean>>({})
 
   const canEdit = isAdminInstitucional || isAdminNacional
 
