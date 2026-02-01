@@ -49,6 +49,7 @@ export function LicitacionesList() {
   const [error, setError] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
   const [busqueda, setBusqueda] = useState('')
+  const [generandoPliegos, setGenerandoPliegos] = useState<Record<string, boolean>>({})
   const [form, setForm] = useState({
     expediente_id: '',
     fecha_cierre: '',
