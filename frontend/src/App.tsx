@@ -7,7 +7,12 @@ import { ExpedientesList } from '@/pages/ExpedientesList'
 import { WizardNuevoExpediente } from '@/pages/WizardNuevoExpediente'
 import { ExpedienteDetail } from '@/pages/ExpedienteDetail'
 import { InstitucionesList } from '@/pages/InstitucionesList'
+import { PerfilesList } from '@/pages/PerfilesList'
+import { RolesList } from '@/pages/RolesList'
 import { LicitacionesList } from '@/pages/LicitacionesList'
+import { OfeertasLicitacionDetail } from '@/pages/OfeertasLicitacionDetail'
+import { EvaluacionesPage } from '@/pages/EvaluacionesPage'
+import { AdjudicacionesPage } from '@/pages/AdjudicacionesPage'
 import { ProveedoresList } from '@/pages/ProveedoresList'
 import { MiPerfilRNP } from '@/pages/MiPerfilRNP'
 import { ContratosList } from '@/pages/ContratosList'
@@ -30,7 +35,12 @@ export default function App() {
         <Route path="expedientes/nuevo" element={<WizardNuevoExpediente />} />
         <Route path="expedientes/:id" element={<ExpedienteDetail />} />
         <Route path="instituciones" element={<InstitucionesList />} />
+        <Route path="perfiles" element={<PerfilesList />} />
+        <Route path="roles" element={<RolesList />} />
         <Route path="licitaciones" element={<LicitacionesList />} />
+        <Route path="licitaciones/:id/ofertas" element={<OfeertasLicitacionDetail />} />
+        <Route path="evaluaciones" element={<EvaluacionesPage />} />
+        <Route path="adjudicaciones" element={<AdjudicacionesPage />} />
         <Route path="proveedores" element={<ProveedoresList />} />
         <Route path="proveedores/mi-perfil" element={<MiPerfilRNP />} />
         <Route path="contratos" element={<ContratosList />} />

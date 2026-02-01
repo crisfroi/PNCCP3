@@ -8,6 +8,7 @@ import {
   FileCheck,
   Shield,
   Users,
+  CheckSquare,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -27,6 +28,18 @@ const navItems: NavItem[] = [
     roles: ['Admin Nacional'],
   },
   {
+    to: '/perfiles',
+    label: 'Perfiles',
+    icon: <Users className="h-5 w-5" />,
+    roles: ['Admin Nacional'],
+  },
+  {
+    to: '/roles',
+    label: 'Roles',
+    icon: <Shield className="h-5 w-5" />,
+    roles: ['Admin Nacional'],
+  },
+  {
     to: '/expedientes',
     label: 'Expedientes',
     icon: <FileText className="h-5 w-5" />,
@@ -43,6 +56,18 @@ const navItems: NavItem[] = [
     label: 'Licitaciones',
     icon: <Gavel className="h-5 w-5" />,
     roles: ['Admin Nacional', 'Admin Institucional', 'Técnico', 'Auditor', 'Proveedor'],
+  },
+  {
+    to: '/evaluaciones',
+    label: 'Evaluaciones',
+    icon: <CheckSquare className="h-5 w-5" />,
+    roles: ['Admin Nacional', 'Admin Institucional', 'Técnico', 'Auditor'],
+  },
+  {
+    to: '/adjudicaciones',
+    label: 'Adjudicaciones',
+    icon: <Gavel className="h-5 w-5" />,
+    roles: ['Admin Nacional', 'Admin Institucional', 'Auditor'],
   },
   {
     to: '/proveedores/mi-perfil',

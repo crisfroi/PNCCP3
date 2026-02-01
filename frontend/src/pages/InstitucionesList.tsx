@@ -4,25 +4,38 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
-import { Building2, Plus } from 'lucide-react'
+import { Building2, Plus, Edit2, CheckCircle } from 'lucide-react'
 
 const TIPOS = ['ministerio', 'entidad_autonoma', 'empresa_publica', 'administracion_central'] as const
 const NIVELES = ['central', 'provincial', 'distrital'] as const
 
+interface Institucion {
+  id: string
+  nombre_oficial: string
+  codigo?: string
+  tipo: string
+  nivel: string
+  institucion_padre_id?: string
+  estado: 'activa' | 'inactiva'
+  created_at: string
+  updated_at: string
+}
+
 export function InstitucionesList() {
   const { isAdminNacional } = useAuth()
-  const [list, setList] = useState<any[]>([])
+  const [list, setList] = useState<Institucion[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [form, setForm] = useState({ nombre_oficial: '', codigo: '', tipo: 'ministerio' as const, nivel: 'central' as const, institucion_padre_id: '' })
+  const [form, setForm] = useState({ nombre_oficial: '', codigo: '', tipo: 'ministerio' as const, nivel: 'central' as const, institucion_padre_id: '', estado: 'activa' as const })
 
   const load = () => {
     supabase
       .schema('core')
       .from('instituciones')
-      .select('id, nombre_oficial, codigo, tipo, nivel, estado, created_at')
+      .select('*')
       .order('nombre_oficial')
       .then(({ data, error }) => {
         setList(error ? [] : data ?? [])
@@ -32,24 +45,88 @@ export function InstitucionesList() {
 
   useEffect(() => { load() }, [])
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setForm({ nombre_oficial: '', codigo: '', tipo: 'ministerio', nivel: 'central', institucion_padre_id: '', estado: 'activa' })
+    setEditingId(null)
+  }
+
+  const handleOpenEdit = (institucion: Institucion) => {
+    setForm({
+      nombre_oficial: institucion.nombre_oficial,
+      codigo: institucion.codigo || '',
+      tipo: institucion.tipo as any,
+      nivel: institucion.nivel as any,
+      institucion_padre_id: institucion.institucion_padre_id || '',
+      estado: institucion.estado,
+    })
+    setEditingId(institucion.id)
+    setShowForm(true)
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (!form.nombre_oficial.trim()) { setError('Nombre oficial es obligatorio.'); return }
     setSaving(true)
-    const { error: err } = await supabase.schema('core').from('instituciones').insert({
-      nombre_oficial: form.nombre_oficial.trim(),
-      codigo: form.codigo.trim() || null,
-      tipo: form.tipo,
-      nivel: form.nivel,
-      institucion_padre_id: form.institucion_padre_id || null,
-      estado: 'activa',
-    })
-    if (err) { setError(err.message); setSaving(false); return }
-    setForm({ nombre_oficial: '', codigo: '', tipo: 'ministerio', nivel: 'central', institucion_padre_id: '' })
-    setShowForm(false)
-    load()
-    setSaving(false)
+
+    try {
+      if (editingId) {
+        // Update existing
+        const { error: err } = await supabase
+          .schema('core')
+          .from('instituciones')
+          .update({
+            nombre_oficial: form.nombre_oficial.trim(),
+            codigo: form.codigo.trim() || null,
+            tipo: form.tipo,
+            nivel: form.nivel,
+            institucion_padre_id: form.institucion_padre_id || null,
+            estado: form.estado,
+          })
+          .eq('id', editingId)
+        if (err) throw err
+      } else {
+        // Create new
+        const { error: err } = await supabase
+          .schema('core')
+          .from('instituciones')
+          .insert({
+            nombre_oficial: form.nombre_oficial.trim(),
+            codigo: form.codigo.trim() || null,
+            tipo: form.tipo,
+            nivel: form.nivel,
+            institucion_padre_id: form.institucion_padre_id || null,
+            estado: 'activa',
+          })
+        if (err) throw err
+      }
+
+      resetForm()
+      setShowForm(false)
+      load()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleToggleEstado = async (institucion: Institucion) => {
+    setSaving(true)
+    try {
+      const newEstado = institucion.estado === 'activa' ? 'inactiva' : 'activa'
+      const { error: err } = await supabase
+        .schema('core')
+        .from('instituciones')
+        .update({ estado: newEstado })
+        .eq('id', institucion.id)
+      if (err) throw err
+      load()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (!isAdminNacional) {
@@ -65,13 +142,13 @@ export function InstitucionesList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-semibold text-institucional-dark">Gestión institucional</h2>
-        <Button icon={<Plus className="h-4 w-4" />} onClick={() => setShowForm(!showForm)}>
+        <Button icon={<Plus className="h-4 w-4" />} onClick={() => { if (!showForm) resetForm(); setShowForm(!showForm) }}>
           {showForm ? 'Cancelar' : 'Nueva institución'}
         </Button>
       </div>
       {showForm && (
-        <Card title="Nueva institución" subtitle="Registre una nueva institución del Estado">
-          <form onSubmit={handleCreate} className="space-y-4">
+        <Card title={editingId ? 'Editar institución' : 'Nueva institución'} subtitle={editingId ? 'Actualice los datos de la institución' : 'Registre una nueva institución del Estado'}>
+          <form onSubmit={handleSave} className="space-y-4">
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div>
               <label className="pnccp-label">Nombre oficial</label>
@@ -102,7 +179,16 @@ export function InstitucionesList() {
                 {list.map((i) => <option key={i.id} value={i.id}>{i.nombre_oficial}</option>)}
               </select>
             </div>
-            <Button type="submit" loading={saving}>Crear institución</Button>
+            {editingId && (
+              <div>
+                <label className="pnccp-label">Estado</label>
+                <select value={form.estado} onChange={(e) => setForm((f) => ({ ...f, estado: e.target.value as any }))} className="pnccp-input">
+                  <option value="activa">Activa</option>
+                  <option value="inactiva">Inactiva</option>
+                </select>
+              </div>
+            )}
+            <Button type="submit" loading={saving}>{editingId ? 'Actualizar institución' : 'Crear institución'}</Button>
           </form>
         </Card>
       )}
@@ -126,6 +212,7 @@ export function InstitucionesList() {
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Tipo</th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Nivel</th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Estado</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
@@ -137,6 +224,24 @@ export function InstitucionesList() {
                     <td className="px-4 py-3 text-sm text-gray-600">{i.nivel}</td>
                     <td className="px-4 py-3">
                       <Badge estado={i.estado === 'activa' ? 'activo' : 'neutro'}>{i.estado}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleOpenEdit(i)}
+                          className="text-institucional-primary hover:text-institucional-dark"
+                          title="Editar"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleToggleEstado(i)}
+                          className={i.estado === 'activa' ? 'text-orange-500 hover:text-orange-700' : 'text-green-600 hover:text-green-800'}
+                          title={i.estado === 'activa' ? 'Desactivar' : 'Activar'}
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
