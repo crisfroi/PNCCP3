@@ -181,9 +181,86 @@ export function LicitacionesList() {
     }
   }
 
+  // Generar Pliego de Condiciones automáticamente
+  const generarPliego = async (licitacion: Licitacion) => {
+    try {
+      setGenerandoPliegos(prev => ({ ...prev, [licitacion.id]: true }))
+
+      if (!licitacion.expedientes) {
+        setError('No se pudieron obtener los datos del expediente')
+        return
+      }
+
+      // Obtener la sesión para obtener el access token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setError('Sesión expirada. Inicie sesión nuevamente.')
+        return
+      }
+
+      // Llamar Edge Function para generar pliego
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-documents`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            template_id: null, // Edge Function obtiene por categoría
+            entidad_origen: 'licitacion',
+            entidad_id: licitacion.id,
+            variables: {
+              objeto_contrato: licitacion.expedientes.objeto_contrato,
+              presupuesto: licitacion.expedientes.presupuesto,
+              fecha_cierre: licitacion.fecha_cierre,
+              codigo_expediente: licitacion.expedientes.codigo_expediente
+            }
+          })
+        }
+      )
+
+      const data = await response.json()
+
+      if (!data.success) {
+        setError(`Error generando pliego: ${data.error}`)
+        return
+      }
+
+      // Guardar emission_id en licitación
+      const { error: updateErr } = await supabase
+        .schema('procurement')
+        .from('licitaciones')
+        .update({ pliego_emission_id: data.emission_id })
+        .eq('id', licitacion.id)
+
+      if (updateErr) throw updateErr
+
+      // Log evento de generación
+      await supabase
+        .schema('documents')
+        .from('document_event_log')
+        .insert({
+          emission_id: data.emission_id,
+          evento: 'licitacion_publicada',
+          entidad_tipo: 'licitacion',
+          entidad_id: licitacion.id
+        })
+        .catch(() => {}) // No fallar si log falla
+
+      await loadData()
+    } catch (err: any) {
+      setError(`Error al generar pliego: ${err.message}`)
+    } finally {
+      setGenerandoPliegos(prev => ({ ...prev, [licitacion.id]: false }))
+    }
+  }
+
   const handlePublicar = async (licitacion: Licitacion) => {
     setSaving(true)
     try {
+      // Actualizar estado a publicada
       const { error: err } = await supabase
         .schema('procurement')
         .from('licitaciones')
@@ -194,7 +271,9 @@ export function LicitacionesList() {
         .eq('id', licitacion.id)
 
       if (err) throw err
-      await loadData()
+
+      // Generar pliego automáticamente
+      await generarPliego({ ...licitacion, estado: 'publicada' })
     } catch (err: any) {
       setError(err.message)
     } finally {
