@@ -19,6 +19,8 @@ import { ContratosList } from '@/pages/ContratosList'
 import { AuditoriaPage } from '@/pages/AuditoriaPage'
 import { DocumentosPage } from '@/pages/DocumentosPage'
 import { EmisionesDocumentalesPage } from '@/pages/EmisionesDocumentalesPage'
+import { DashboardAnalytics } from '@/pages/DashboardAnalytics'
+import { ReportePorInstitucion } from '@/pages/ReportePorInstitucion'
 
 export default function App() {
   return (
