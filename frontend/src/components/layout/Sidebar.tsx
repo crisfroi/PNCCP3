@@ -10,6 +10,8 @@ import {
   Users,
   CheckSquare,
   File,
+  BarChart3,
+  TrendingUp,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
