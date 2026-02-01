@@ -212,6 +212,7 @@ export function InstitucionesList() {
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Tipo</th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Nivel</th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Estado</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
@@ -223,6 +224,24 @@ export function InstitucionesList() {
                     <td className="px-4 py-3 text-sm text-gray-600">{i.nivel}</td>
                     <td className="px-4 py-3">
                       <Badge estado={i.estado === 'activa' ? 'activo' : 'neutro'}>{i.estado}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleOpenEdit(i)}
+                          className="text-institucional-primary hover:text-institucional-dark"
+                          title="Editar"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleToggleEstado(i)}
+                          className={i.estado === 'activa' ? 'text-orange-500 hover:text-orange-700' : 'text-green-600 hover:text-green-800'}
+                          title={i.estado === 'activa' ? 'Desactivar' : 'Activar'}
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
