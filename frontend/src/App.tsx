@@ -47,6 +47,8 @@ export default function App() {
         <Route path="proveedores/mi-perfil" element={<MiPerfilRNP />} />
         <Route path="contratos" element={<ContratosList />} />
         <Route path="auditoria" element={<AuditoriaPage />} />
+        <Route path="documentos" element={<DocumentosPage />} />
+        <Route path="emisiones-documentales" element={<EmisionesDocumentalesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
