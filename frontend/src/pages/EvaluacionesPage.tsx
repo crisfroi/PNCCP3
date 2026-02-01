@@ -172,25 +172,55 @@ export function EvaluacionesPage() {
       try {
         const oferta = ofertas.find((o) => o.id === ofertaId)
         if (oferta) {
-          const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-documents`
-          await fetch(edgeFunctionUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('sb-token') || ''}`,
-            },
-            body: JSON.stringify({
-              template_id: '', // Se buscaría por categoría en producción
-              entidad_origen: 'licitacion',
-              entidad_id: oferta.licitacion_id,
-              variables: {
-                puntuacion_tecnica: pTecnica,
-                puntuacion_economica: pEconomica,
-                puntuacion_total: pTotal,
-                observaciones: form.observaciones,
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session) {
+            const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-documents`
+            const response = await fetch(edgeFunctionUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`,
               },
-            }),
-          })
+              body: JSON.stringify({
+                template_id: null, // Edge Function obtiene por categoría
+                entidad_origen: 'licitacion',
+                entidad_id: oferta.licitacion_id,
+                variables: {
+                  puntuacion_tecnica: pTecnica,
+                  puntuacion_economica: pEconomica,
+                  puntuacion_total: pTotal,
+                  observaciones: form.observaciones,
+                },
+              }),
+            })
+
+            const docData = await response.json()
+
+            if (docData.success && docData.emission_id) {
+              // Guardar emission_id en licitación
+              const { error: updateErr } = await supabase
+                .schema('procurement')
+                .from('licitaciones')
+                .update({ acta_emission_id: docData.emission_id })
+                .eq('id', oferta.licitacion_id)
+
+              if (updateErr) {
+                console.warn('Error al guardar acta_emission_id:', updateErr)
+              }
+
+              // Log evento de generación
+              await supabase
+                .schema('documents')
+                .from('document_event_log')
+                .insert({
+                  emission_id: docData.emission_id,
+                  evento: 'evaluacion_completada',
+                  entidad_tipo: 'licitacion',
+                  entidad_id: oferta.licitacion_id,
+                })
+                .catch(() => {}) // No fallar si log falla
+            }
+          }
         }
       } catch (docErr) {
         console.warn('Error generando acta de evaluación:', docErr)
