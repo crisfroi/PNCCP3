@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import Card from '../components/ui/Card'
-import Button from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
 import { ChevronDown, ChevronUp, Download, Archive, Eye } from 'lucide-react'
 
 interface DocumentEmission {
