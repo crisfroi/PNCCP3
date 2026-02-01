@@ -191,7 +191,7 @@ export function AdjudicacionesPage() {
       if (updateLicErr) throw updateLicErr
 
       // Create contrato
-      const { error: createContratErr } = await supabase
+      const { data: contratoData, error: createContratErr } = await supabase
         .schema('core')
         .from('contratos')
         .insert({
@@ -203,8 +203,42 @@ export function AdjudicacionesPage() {
           estado: 'vigente',
           responsable_id: form.responsable_id,
         })
+        .select('id')
+        .single()
 
       if (createContratErr) throw createContratErr
+
+      // Generar automáticamente documento de resolución de adjudicación
+      if (contratoData) {
+        try {
+          const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-documents`
+          const response = await fetch(edgeFunctionUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('sb-token') || ''}`,
+            },
+            body: JSON.stringify({
+              template_id: '', // Se buscaría por categoría en producción
+              entidad_origen: 'contrato',
+              entidad_id: contratoData.id,
+              variables: {
+                ganador: oferta.proveedores?.razon_social,
+                monto: oferta.monto.toLocaleString('es-ES', { style: 'currency', currency: 'XAF' }),
+                fundamento: `Resolución de adjudicación a favor del proveedor seleccionado tras evaluación de ofertas`,
+              },
+            }),
+          })
+
+          if (response.ok) {
+            const docResult = await response.json()
+            console.log('Documento generado:', docResult)
+          }
+        } catch (docErr) {
+          console.warn('Error generando documento:', docErr)
+          // No bloquear el flujo si la generación falla
+        }
+      }
 
       setAdjudicandoLicitacion(null)
       await loadData()

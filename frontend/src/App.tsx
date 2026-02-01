@@ -17,6 +17,8 @@ import { ProveedoresList } from '@/pages/ProveedoresList'
 import { MiPerfilRNP } from '@/pages/MiPerfilRNP'
 import { ContratosList } from '@/pages/ContratosList'
 import { AuditoriaPage } from '@/pages/AuditoriaPage'
+import { DocumentosPage } from '@/pages/DocumentosPage'
+import { EmisionesDocumentalesPage } from '@/pages/EmisionesDocumentalesPage'
 
 export default function App() {
   return (
@@ -45,6 +47,8 @@ export default function App() {
         <Route path="proveedores/mi-perfil" element={<MiPerfilRNP />} />
         <Route path="contratos" element={<ContratosList />} />
         <Route path="auditoria" element={<AuditoriaPage />} />
+        <Route path="documentos" element={<DocumentosPage />} />
+        <Route path="emisiones-documentales" element={<EmisionesDocumentalesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

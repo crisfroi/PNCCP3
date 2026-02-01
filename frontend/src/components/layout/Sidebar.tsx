@@ -9,6 +9,7 @@ import {
   Shield,
   Users,
   CheckSquare,
+  File,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -92,6 +93,18 @@ const navItems: NavItem[] = [
     label: 'Auditoría',
     icon: <Shield className="h-5 w-5" />,
     roles: ['Admin Nacional', 'Auditor'],
+  },
+  {
+    to: '/documentos',
+    label: 'Plantillas de Documentos',
+    icon: <File className="h-5 w-5" />,
+    roles: ['Admin Nacional', 'Admin Institucional'],
+  },
+  {
+    to: '/emisiones-documentales',
+    label: 'Emisiones Documentales',
+    icon: <FileCheck className="h-5 w-5" />,
+    roles: ['Admin Nacional', 'Admin Institucional', 'Técnico', 'Auditor'],
   },
 ]
 
