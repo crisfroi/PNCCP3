@@ -168,6 +168,35 @@ export function EvaluacionesPage() {
 
       if (stateErr) throw stateErr
 
+      // Generar automáticamente acta de evaluación
+      try {
+        const oferta = ofertas.find((o) => o.id === ofertaId)
+        if (oferta) {
+          const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-documents`
+          await fetch(edgeFunctionUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('sb-token') || ''}`,
+            },
+            body: JSON.stringify({
+              template_id: '', // Se buscaría por categoría en producción
+              entidad_origen: 'licitacion',
+              entidad_id: oferta.licitacion_id,
+              variables: {
+                puntuacion_tecnica: pTecnica,
+                puntuacion_economica: pEconomica,
+                puntuacion_total: pTotal,
+                observaciones: form.observaciones,
+              },
+            }),
+          })
+        }
+      } catch (docErr) {
+        console.warn('Error generando acta de evaluación:', docErr)
+        // No bloquear el flujo si la generación falla
+      }
+
       setEvaluandoOferta(null)
       await loadOfertas()
     } catch (err: any) {
