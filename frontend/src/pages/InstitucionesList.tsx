@@ -142,13 +142,13 @@ export function InstitucionesList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-semibold text-institucional-dark">Gestión institucional</h2>
-        <Button icon={<Plus className="h-4 w-4" />} onClick={() => setShowForm(!showForm)}>
+        <Button icon={<Plus className="h-4 w-4" />} onClick={() => { if (!showForm) resetForm(); setShowForm(!showForm) }}>
           {showForm ? 'Cancelar' : 'Nueva institución'}
         </Button>
       </div>
       {showForm && (
-        <Card title="Nueva institución" subtitle="Registre una nueva institución del Estado">
-          <form onSubmit={handleCreate} className="space-y-4">
+        <Card title={editingId ? 'Editar institución' : 'Nueva institución'} subtitle={editingId ? 'Actualice los datos de la institución' : 'Registre una nueva institución del Estado'}>
+          <form onSubmit={handleSave} className="space-y-4">
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div>
               <label className="pnccp-label">Nombre oficial</label>
@@ -179,7 +179,16 @@ export function InstitucionesList() {
                 {list.map((i) => <option key={i.id} value={i.id}>{i.nombre_oficial}</option>)}
               </select>
             </div>
-            <Button type="submit" loading={saving}>Crear institución</Button>
+            {editingId && (
+              <div>
+                <label className="pnccp-label">Estado</label>
+                <select value={form.estado} onChange={(e) => setForm((f) => ({ ...f, estado: e.target.value as any }))} className="pnccp-input">
+                  <option value="activa">Activa</option>
+                  <option value="inactiva">Inactiva</option>
+                </select>
+              </div>
+            )}
+            <Button type="submit" loading={saving}>{editingId ? 'Actualizar institución' : 'Crear institución'}</Button>
           </form>
         </Card>
       )}
