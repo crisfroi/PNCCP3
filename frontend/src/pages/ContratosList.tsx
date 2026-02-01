@@ -21,6 +21,9 @@ interface Contrato {
   fecha_fin: string
   estado: 'vigente' | 'modificado' | 'terminado' | 'rescindido'
   created_at: string
+  resolucion_emission_id?: string
+  contrato_emission_id?: string
+  certificado_emission_id?: string
   expedientes?: { codigo_expediente: string }
   proveedores?: { razon_social: string }
   hitos_contrato?: Hito[]
