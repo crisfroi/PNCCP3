@@ -27,6 +27,18 @@ const navItems: NavItem[] = [
     roles: ['Admin Nacional'],
   },
   {
+    to: '/perfiles',
+    label: 'Perfiles',
+    icon: <Users className="h-5 w-5" />,
+    roles: ['Admin Nacional'],
+  },
+  {
+    to: '/roles',
+    label: 'Roles',
+    icon: <Shield className="h-5 w-5" />,
+    roles: ['Admin Nacional'],
+  },
+  {
     to: '/expedientes',
     label: 'Expedientes',
     icon: <FileText className="h-5 w-5" />,
