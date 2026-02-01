@@ -50,6 +50,7 @@ export function ContratosList() {
         .from('contratos')
         .select(`
           id, monto_adjudicado, fecha_inicio, fecha_fin, estado, created_at,
+          resolucion_emission_id, contrato_emission_id, certificado_emission_id,
           expedientes(codigo_expediente),
           proveedores:rnp.proveedores(razon_social),
           hitos_contrato(id, descripcion, fecha_prevista, fecha_real, estado)
